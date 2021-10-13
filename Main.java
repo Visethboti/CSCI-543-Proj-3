@@ -21,7 +21,7 @@ public class Main {
 		EA_Sudoku ea_sudoku = new EA_Sudoku(sudokuProblem);
 		
 		// Run the EA
-		ea_sudoku.runEA();
+		ea_sudoku.runEA(1);
 		
 	}
 }

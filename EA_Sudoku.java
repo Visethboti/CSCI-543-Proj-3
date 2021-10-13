@@ -1,9 +1,11 @@
 import java.io.File;
 import java.util.Scanner;
+import java.util.Random;
 
 public class EA_Sudoku {
 	private final int[][] sudokuProblem;
 	private int numGenerationsToRun;
+	private static Random random;
 	
 	// Parameters
 	private final int popsSize = 10;
@@ -14,25 +16,43 @@ public class EA_Sudoku {
 	// *** Constructor ***
 	public EA_Sudoku(int[][] sudokuProblem){
 		this.sudokuProblem = sudokuProblem;
+		this.random = new Random();
 	}
 	
 	// *** Run ***
 	public void runEA(int numGenerationsToRun){
 		this.numGenerationsToRun = numGenerationsToRun;
-
-		printProblem();
 		
 		initialization();
+		printPopulations();
+		
+		
 	}
 	
 	// EA Methods
 	private void initialization(){
 		populations = new int[popsSize][9][9];
+		int randomValue;
 		
 		for(int i = 0; i < popsSize; i++){
+			// add the pre-filled
 			for(int j = 0; j < 9; j++){
 				for(int k = 0; k < 9; k++){
-					
+					if(sudokuProblem[j][k] != 0){
+						populations[i][j][k] = sudokuProblem[j][k];
+					}
+				}
+			}
+			
+			// fill in the empty 
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					if(sudokuProblem[j][k] == 0){
+						do{
+							randomValue = random.nextInt(9)+1;
+						}while(notExistIn(populations[i][j], randomValue));
+						populations[i][j][k] = randomValue;
+					}
 				}
 			}
 		}
@@ -68,5 +88,26 @@ public class EA_Sudoku {
 			}
 			System.out.println("");
 		}
+	}
+	
+	private void printPopulations(){
+		for(int i = 0; i < popsSize; i++){
+			// add the pre-filled
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					System.out.print(populations[i][j][k]);
+				}
+				System.out.println("");
+			}
+			System.out.println("================");
+		}
+	}
+	
+	private boolean notExistIn(int[] array, int x){
+		for(int i = 0; i < 9; i++){
+			if(array[i] == x)
+				return true;
+		}
+		return false;
 	}
 }
