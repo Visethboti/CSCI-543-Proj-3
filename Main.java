@@ -22,6 +22,5 @@ public class Main {
 		
 		// Run the EA
 		ea_sudoku.runEA(1);
-		
 	}
 }
