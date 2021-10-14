@@ -8,11 +8,17 @@ public class EA_Sudoku {
 	private static Random random;
 	
 	// Parameters
-	private final int popsSize = 10;
-	private final int parentSize = 4;
-	private final int offspringSize = 2;
-	private final int elitismSize = 2;
+	private final int popsSize = 1000;
+	private final double parentSizePercentage = 0.4; 
+	private final double offspringSizePercentage = 0.9;
+	private final double elitismSizePercentage = 0.1;
+	private final double mutationProbality = 0.05;
 	private final int kTournamentSize = 3;
+	
+	//
+	private final int parentSize = (int) (popsSize * parentSizePercentage);
+	private final int offspringSize = (int) (popsSize * offspringSizePercentage);
+	private final int elitismSize = popsSize - offspringSize;
 	
 	// Initialization
 	private int[][][] populations;
@@ -48,13 +54,22 @@ public class EA_Sudoku {
 		this.numGenerationsToRun = numGenerationsToRun;
 		
 		initialization();
-		fitnessCalculation();
 		//printPopulations();
-		parentSelection();
-		crossOver();
-		//printOffspringPool();
-		printPopFitness();
-		elitism();
+		for(int i = 0; i < numGenerationsToRun; i++){
+			fitnessCalculation();
+			parentSelection();
+			crossOver();
+			//printOffspringPool();
+			//printPopFitness();
+			elitism();
+			replaceGeneration();
+		}
+		fitnessCalculation();
+		//printPopFitness();
+		//printPopulations();
+		printRandomPopulation();
+		printRandomPopulation();
+		printRandomPopulation();
 	}
 	
 	// EA Methods
@@ -111,7 +126,7 @@ public class EA_Sudoku {
 							array[x] = populations[i][x][k];
 						}
 						if(existMoreThanOnce(array, populations[i][j][k])){
-							//fitness -= 1;
+							fitness -= 1;
 						}
 						
 						// 3 by 3
@@ -166,7 +181,7 @@ public class EA_Sudoku {
 			
 			// Put it into parentPool
 			parentPool[i] = tournamentPool[indexSelected];
-			System.out.println("Parent: " + parentPool[i]);
+			//System.out.println("Parent: " + parentPool[i]); // for debugging
 		}
 		
 		return;
@@ -236,13 +251,34 @@ public class EA_Sudoku {
 					elitismPool[i][j][k] = populations[elitismIndex[i]][j][k];
 				}
 			}
-			System.out.println("Elitism - " + elitismIndex[i]);
+			//System.out.println("Elitism - " + elitismIndex[i]);// for debugging
 		}
 		
 		return;
 	}
 		
 	private void replaceGeneration(){
+		int counter = 0;
+		
+		// Combine offspring and elitismPool to make the next generation
+		for(int i = 0; i < offspringSize; i++){
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					populations[counter][j][k] = offspringPool[i][j][k];
+				}
+			}
+			counter++;
+		}
+		
+		for(int i = 0; i < elitismSize; i++){
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					populations[counter][j][k] = elitismPool[i][j][k];
+				}
+			}
+			counter++;
+		}
+		
 		return;
 	}
 
@@ -274,6 +310,20 @@ public class EA_Sudoku {
 			}
 			System.out.println("================");
 		}
+	}
+	
+	private void printRandomPopulation(){
+		int randomValue = random.nextInt(popsSize);
+		System.out.print(randomValue);
+		System.out.print("| Fitness: ");
+		System.out.println(popFitness[randomValue]);
+		for(int j = 0; j < 9; j++){
+			for(int k = 0; k < 9; k++){
+				System.out.print(populations[randomValue][j][k]);
+			}
+			System.out.println("");
+		}
+		System.out.println("================");
 	}
 	
 	private void printPopFitness(){
