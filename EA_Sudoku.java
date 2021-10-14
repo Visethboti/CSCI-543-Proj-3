@@ -8,7 +8,11 @@ public class EA_Sudoku {
 	private static Random random;
 	
 	// Parameters
-	private final int popsSize = 2;
+	private final int popsSize = 10;
+	private final int parentSize = 4;
+	private final int offspringSize = 2;
+	private final int elitismSize = 2;
+	private final int kTournamentSize = 3;
 	
 	// Initialization
 	private int[][][] populations;
@@ -16,12 +20,27 @@ public class EA_Sudoku {
 	// Fitness Calculation
 	private int[] popFitness;
 	
+	// Parents SelectionEvent
+	private int[] parentPool;
+	
+	// Crossover
+	private int[][][] offspringPool;
+	
+	// Elitism
+	private int[][][] elitismPool;
+	
+	// New generation
+	private int[][][] nextGenPopulation;
+	
 	// *** Constructor ***
 	public EA_Sudoku(int[][] sudokuProblem){
 		this.sudokuProblem = sudokuProblem;
 		
 		this.popFitness = new int[popsSize];
 		this.random = new Random();
+		this.parentPool = new int[parentSize];
+		this.offspringPool = new int[offspringSize][9][9];
+		this.elitismPool = new int[elitismSize][9][9];
 	}
 	
 	// *** Run ***
@@ -31,7 +50,7 @@ public class EA_Sudoku {
 		initialization();
 		fitnessCalculation();
 		printPopulations();
-		
+		parentSelection();
 		
 	}
 	
@@ -72,7 +91,7 @@ public class EA_Sudoku {
 		
 		int indexR, indexC, counter;
 		for(int i = 0; i < popsSize; i++){ // each pop
-			fitness = 81*3;
+			fitness = 81*2;
 			for(int j = 0; j < 9; j++){ // column
 				for(int k = 0; k < 9 && fitness > 0; k++){ // row
 					if(sudokuProblem[j][k] != populations[i][j][k] && sudokuProblem[j][k] != 0){
@@ -118,6 +137,35 @@ public class EA_Sudoku {
 	}
 
 	private void parentSelection(){
+		int[] tournamentPool = new int[kTournamentSize];
+		int indexSelected = 0, highestFitness, randomValue;
+		
+		for(int i = 0; i < parentSize; i++){
+			// Randomly select K number from populations
+			for(int j = 0; j < kTournamentSize; j++){
+				// select random pop that not already in tournamentPool and not already selected as a parent
+				do{
+					randomValue = random.nextInt(popsSize);
+				}while(existIn(tournamentPool, randomValue) || existIn(parentPool, randomValue));
+				
+				// put in tournamentPool
+				tournamentPool[j] = randomValue;
+			}
+			
+			// Select the highest fitness pop in the tournamentPool
+			highestFitness = 0;
+			for(int j = 0; j < kTournamentSize; j++){
+				if(highestFitness < popFitness[tournamentPool[j]]){
+					highestFitness = popFitness[tournamentPool[j]];
+					indexSelected = j; // j is index in tournamentPool, which store index of populations
+				}
+			}
+			
+			// Put it into parentPool
+			parentPool[i] = tournamentPool[indexSelected];
+			System.out.println("Parent: " + parentPool[i]);
+		}
+		
 		return;
 	}
 
@@ -160,7 +208,7 @@ public class EA_Sudoku {
 	}
 	
 	private boolean existIn(int[] array, int x){
-		for(int i = 0; i < 9; i++){
+		for(int i = 0; i < array.length; i++){
 			if(array[i] == x)
 				return true;
 		}
@@ -169,7 +217,7 @@ public class EA_Sudoku {
 	
 	private boolean existMoreThanOnce(int[] array, int x){
 		int counter = 0;
-		for(int i = 0; i < 9; i++){
+		for(int i = 0; i < array.length; i++){
 			if(array[i] == x){
 				counter++;
 			}
