@@ -8,7 +8,7 @@ public class EA_Sudoku {
 	private static Random random;
 	
 	// Parameters
-	private final int popsSize = 1000;
+	private final int popsSize = 10;
 	private final int parentSize = 4;
 	private final int offspringSize = 2;
 	private final int elitismSize = 2;
@@ -52,7 +52,9 @@ public class EA_Sudoku {
 		//printPopulations();
 		parentSelection();
 		crossOver();
-		printOffspringPool();
+		//printOffspringPool();
+		printPopFitness();
+		elitism();
 	}
 	
 	// EA Methods
@@ -92,7 +94,7 @@ public class EA_Sudoku {
 		
 		int indexR, indexC, counter;
 		for(int i = 0; i < popsSize; i++){ // each pop
-			fitness = 81*2;
+			fitness = 81;
 			for(int j = 0; j < 9; j++){ // column
 				for(int k = 0; k < 9 && fitness > 0; k++){ // row
 					if(sudokuProblem[j][k] != populations[i][j][k] && sudokuProblem[j][k] != 0){
@@ -204,6 +206,39 @@ public class EA_Sudoku {
 	}
 	
 	private void elitism(){
+		int[] elitismIndex = new int[elitismSize];
+		int indexHighestFitness = 0;
+		int highestFitness = 0;
+		boolean notExist = true;
+		
+		// get all the indexs
+		for(int i = 0; i < elitismSize; i++){
+			indexHighestFitness = 0;
+			highestFitness = 0;		
+			for(int j = 0; j < popsSize; j++){
+				if(existIn(elitismIndex, j)){
+					notExist = false;
+				}
+				
+				if(highestFitness < popFitness[j] && notExist){
+					highestFitness = popFitness[j];
+					indexHighestFitness = j;
+				}
+				notExist = true;
+			}
+			elitismIndex[i] = indexHighestFitness;
+		}
+		
+		// put the index pop into elitismPool
+		for(int i = 0; i < elitismSize; i++){
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					elitismPool[i][j][k] = populations[elitismIndex[i]][j][k];
+				}
+			}
+			System.out.println("Elitism - " + elitismIndex[i]);
+		}
+		
 		return;
 	}
 		
@@ -238,6 +273,12 @@ public class EA_Sudoku {
 				System.out.println("");
 			}
 			System.out.println("================");
+		}
+	}
+	
+	private void printPopFitness(){
+		for(int i = 0; i < popsSize; i++){
+			System.out.println(i+"|Fitness="+popFitness[i]);
 		}
 	}
 	
