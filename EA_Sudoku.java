@@ -8,7 +8,7 @@ public class EA_Sudoku {
 	private static Random random;
 	
 	// Parameters
-	private final int popsSize = 10;
+	private final int popsSize = 1000;
 	private final int parentSize = 4;
 	private final int offspringSize = 2;
 	private final int elitismSize = 2;
@@ -49,9 +49,10 @@ public class EA_Sudoku {
 		
 		initialization();
 		fitnessCalculation();
-		printPopulations();
+		//printPopulations();
 		parentSelection();
-		
+		crossOver();
+		printOffspringPool();
 	}
 	
 	// EA Methods
@@ -170,6 +171,39 @@ public class EA_Sudoku {
 	}
 
 	private void crossOver(){
+		int index1, index2, randomValue1, randomValue2, randomPickedParent;
+		for(int i = 0; i < offspringSize; i++){
+			// randomly select two parent from parent pool
+			randomValue1 = random.nextInt(parentSize);
+			do{
+				randomValue2 = random.nextInt(parentSize);
+			}while(randomValue1 == randomValue2);
+			
+			index1 = parentPool[randomValue1];
+			index2 = parentPool[randomValue2];
+			
+			//System.out.println(randomValue1 + " = " + randomValue2); // For debugging
+			
+			// create a new offspring from both parent
+			for(int j = 0; j < 9; j++){
+				//randomly pick a row from one of the two parent
+				if(random.nextBoolean()){ // parent 1
+					randomPickedParent = index1;
+				} else { // parent 2
+					randomPickedParent = index2;
+				}
+				
+				//place the row in to the offspring
+				for(int k = 0; k < 9; k++){
+					offspringPool[i][j][k] = populations[randomPickedParent][j][k];
+				}
+			}
+		}
+		
+		return;
+	}
+	
+	private void elitism(){
 		return;
 	}
 		
@@ -200,6 +234,20 @@ public class EA_Sudoku {
 			for(int j = 0; j < 9; j++){
 				for(int k = 0; k < 9; k++){
 					System.out.print(populations[i][j][k]);
+				}
+				System.out.println("");
+			}
+			System.out.println("================");
+		}
+	}
+	
+	private void printOffspringPool(){
+		for(int i = 0; i < offspringSize; i++){
+			// add the pre-filled
+			System.out.println(i + " === ");
+			for(int j = 0; j < 9; j++){
+				for(int k = 0; k < 9; k++){
+					System.out.print(offspringPool[i][j][k]);
 				}
 				System.out.println("");
 			}
