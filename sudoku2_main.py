@@ -97,9 +97,9 @@ def print_board(bo):
     for i in range(len(bo)):
         if i % 3 == 0:
             if i == 0:
-                print(" ┎─────────────────────────┒")
+                print(" ┎─────────────────────────────┒")
             else:
-                print(" ┠─────────────────────────┨")
+                print(" ┠─────────────────────────────┨")
 
         for j in range(len(bo[0])):
             if j % 3 == 0:
@@ -110,7 +110,7 @@ def print_board(bo):
             else:
                 print(bo[i][j], end=" ")
 
-    print(" ┖─────────────────────────┚")
+    print(" ┖─────────────────────────────┚")
 
 
 def find_empty(bo):
@@ -124,15 +124,15 @@ def find_empty(bo):
 print('\n--------------------------------------\n')
 
 print('× Unsolved Suduku :-')
-print_board(board)
+print_board(tableEA3)
 
 print('\n--------------------------------------\n')
 
 t1 = perf_counter()
-solve(board)
+solve(tableEA3)
 t2 = perf_counter()
 print('× Solved Suduku :-')
-print_board(board)
+print_board(tableEA3)
 
 print('\n--------------------------------------\n')
 

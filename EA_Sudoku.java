@@ -13,7 +13,7 @@ public class EA_Sudoku {
 	private final double offspringSizePercentage = 0.9;
 	private final double elitismSizePercentage = 0.1;
 	private final double mutationProbality = 0.0005;
-	private final int kTournamentSize = 3;
+	private final int kTournamentSize = 30;
 	
 	private final int startingFitness = 81*3;
 	private final int stopConditionFitnessValue = 100;
@@ -70,6 +70,7 @@ public class EA_Sudoku {
 		
 		avgFitnessBegin = getAvgFitness();
 		printFitnessStat();
+		
 		//printPopulations();
 		for(int i = 0; i < numGenerationsToRun && (!stopRunning); i++){
 			parentSelection();
@@ -375,6 +376,7 @@ public class EA_Sudoku {
 			System.out.println(popFitness[i]);
 			for(int j = 0; j < 9; j++){
 				for(int k = 0; k < 9; k++){
+					System.out.print(" ");
 					System.out.print(populations[i][j][k]);
 				}
 				System.out.println("");

@@ -325,7 +325,7 @@ printTable(solver6(table2))
 """
 
 start_time = time.time()
-printTable(solver1(tableEA1))
+printTable(solver4(tableEA1))
 print("--- %s seconds ---" % (time.time() - start_time))
 
 """

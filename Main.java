@@ -58,12 +58,12 @@ public class Main {
 		
 		
 		// EA For Sudoku Instances
-		EA_Sudoku ea_sudoku = new EA_Sudoku(sudokuProblem3);
+		EA_Sudoku ea_sudoku = new EA_Sudoku(sudokuProblem1);
 		
 		long start = System.currentTimeMillis();
 		
 		// Run the EA
-		ea_sudoku.runEA(50);
+		ea_sudoku.runEA(500);
 		
 		long finished = System.currentTimeMillis();
 		double timeElapsed = (finished - start) / (double)1000;
