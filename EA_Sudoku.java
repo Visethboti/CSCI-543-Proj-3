@@ -9,11 +9,14 @@ public class EA_Sudoku {
 	
 	// Parameters
 	private final int popsSize = 1000;
-	private final double parentSizePercentage = 0.4; 
+	private final double parentSizePercentage = 0.5; 
 	private final double offspringSizePercentage = 0.9;
 	private final double elitismSizePercentage = 0.1;
-	private final double mutationProbality = 0.05;
+	private final double mutationProbality = 0.0005;
 	private final int kTournamentSize = 3;
+	
+	private final int startingFitness = 81*3;
+	private final int stopConditionFitnessValue = 100;
 	
 	//
 	private final int parentSize = (int) (popsSize * parentSizePercentage);
@@ -38,6 +41,14 @@ public class EA_Sudoku {
 	// New generation
 	private int[][][] nextGenPopulation;
 	
+	// Stat
+	public double avgFitnessBegin;
+	public double avgFitnessFinish;
+	public int highestFitnessBegin;
+	public int highestFitnessFinish;
+	public int lowestFitnessBegin;
+	public int lowestFitnessFinish;
+	
 	// *** Constructor ***
 	public EA_Sudoku(int[][] sudokuProblem){
 		this.sudokuProblem = sudokuProblem;
@@ -52,24 +63,38 @@ public class EA_Sudoku {
 	// *** Run ***
 	public void runEA(int numGenerationsToRun){
 		this.numGenerationsToRun = numGenerationsToRun;
+		boolean stopRunning = false;
 		
 		initialization();
+		fitnessCalculation();
+		
+		avgFitnessBegin = getAvgFitness();
+		printFitnessStat();
 		//printPopulations();
-		for(int i = 0; i < numGenerationsToRun; i++){
-			fitnessCalculation();
+		for(int i = 0; i < numGenerationsToRun && (!stopRunning); i++){
 			parentSelection();
 			crossOver();
 			//printOffspringPool();
-			//printPopFitness();
+			//printPopulations();
 			elitism();
 			replaceGeneration();
+			mutation();
+			fitnessCalculation();
+			
+			stopRunning = stopCondition();
+			//System.out.println("Gen: " + i + " AvgF: " + getAvgFitness());
 		}
 		fitnessCalculation();
+		
 		//printPopFitness();
 		//printPopulations();
-		printRandomPopulation();
-		printRandomPopulation();
-		printRandomPopulation();
+		//printRandomPopulation();
+		//printRandomPopulation();
+		//printRandomPopulation();
+		
+		printFitnessStat();
+		avgFitnessFinish = getAvgFitness();
+		highestFitnessFinish = getHighestFitness();
 	}
 	
 	// EA Methods
@@ -109,7 +134,7 @@ public class EA_Sudoku {
 		
 		int indexR, indexC, counter;
 		for(int i = 0; i < popsSize; i++){ // each pop
-			fitness = 81;
+			fitness = startingFitness;
 			for(int j = 0; j < 9; j++){ // column
 				for(int k = 0; k < 9 && fitness > 0; k++){ // row
 					if(sudokuProblem[j][k] != populations[i][j][k] && sudokuProblem[j][k] != 0){
@@ -148,6 +173,9 @@ public class EA_Sudoku {
 					}
 				}
 			}
+			
+			if(fitness < 0)
+				fitness = 0;
 			popFitness[i] = fitness;
 		}
 		
@@ -283,10 +311,53 @@ public class EA_Sudoku {
 	}
 
 	private void mutation(){
+		double randomValue1;
+		int randomValue2, randomValue3;
+		for(int i = 0; i < popsSize; i++){
+			randomValue1 = random.nextDouble();
+			if(randomValue1 <= mutationProbality){
+				randomValue2 = random.nextInt(9);
+				for(int j = 0; j < 9; j++){
+					populations[i][randomValue2][j] = 0;
+				}
+				for(int j = 0; j < 9; j++){
+					do{
+						randomValue3 = random.nextInt(9)+1;
+					}while(existIn(populations[i][randomValue2], randomValue3));
+					populations[i][randomValue2][j] = randomValue3;
+				}
+			}
+		}
+		
 		return;
 	}
 	
+	private boolean stopCondition(){
+		double sum = 0, avgFitness = 0;
+		int highestFitness = 0, highestFitessIndex = 0, lowestFitness = popFitness[0], lowestFitessIndex = 0;
+		
+		
+		for(int i = 0; i < popsSize; i++){
+			if(highestFitness < popFitness[i]){
+				highestFitessIndex = i;
+				highestFitness = popFitness[i];
+			}
+			if(lowestFitness > popFitness[i]){
+				lowestFitessIndex = i;
+				lowestFitness = popFitness[i];
+			}
+			sum+=popFitness[i];
+		}
+		avgFitness = (double) sum / popsSize;
+		
+		if(avgFitness > 240 || highestFitness == startingFitness ){
+			return true;
+		}
+		return false;
+	}
+	
 	// Utilities Method
+	// Printing
 	public void printProblem(){
 		for(int i = 0; i < 9; i++){
 			for(int j = 0; j < 9; j++){
@@ -346,8 +417,55 @@ public class EA_Sudoku {
 		}
 	}
 	
+	private double getAvgFitness(){
+		double sum = 0, avgFitness = 0;
+		for(int i = 0; i < popsSize; i++){
+			sum+=popFitness[i];
+		}
+		avgFitness = (double) sum / popsSize;
+		return avgFitness;
+	}
+	
+	private int getHighestFitness(){
+		int highestFitness = 0;
+		for(int i = 0; i < popsSize; i++){
+			if(highestFitness < popFitness[i])
+				highestFitness = popFitness[i];
+		}
+		return highestFitness;
+	}
+	
+	private void printFitnessStat(){
+		double sum = 0, avgFitness = 0;
+		int highestFitness = 0, highestFitessIndex = 0, lowestFitness = popFitness[0], lowestFitessIndex = 0;
+		
+		
+		for(int i = 0; i < popsSize; i++){
+			if(highestFitness < popFitness[i]){
+				highestFitessIndex = i;
+				highestFitness = popFitness[i];
+			}
+			if(lowestFitness > popFitness[i]){
+				lowestFitessIndex = i;
+				lowestFitness = popFitness[i];
+			}
+			sum+=popFitness[i];
+		}
+		avgFitness = (double) sum / popsSize;
+		
+		//Print the stats
+		System.out.println("====== EA Stats ====== ");
+		System.out.println("Parameter: ");
+		System.out.println("Pop size: " + popsSize + "| Parent size: " + parentSizePercentage 
+		+ "| offspring size: " + offspringSizePercentage + "| Elitism size: " + elitismSizePercentage + "| Number of generation ran: " + numGenerationsToRun);
+		System.out.println("Stat: ");
+		System.out.println("Average Fitness: " + avgFitness + "| Highest Fitness: " + highestFitness + "| Lowest Fitness: " + lowestFitness);
+	}
+	
+	
+	// Others
 	private boolean existIn(int[] array, int x){
-		for(int i = 0; i < array.length; i++){
+		for(int i = 0; i < array.length; i++){	
 			if(array[i] == x)
 				return true;
 		}
